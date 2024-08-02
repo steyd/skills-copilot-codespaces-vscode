@@ -1,34 +1,40 @@
 // Create web server
-// Create a new express app
-const express = require('express');
-const app = express();
+// Run: node comments.js
+// Access in browser: http://localhost:8080/
 
-// Create a new comment
-app.post('/comments', (req, res) => {
-  res.send('Creating a new comment');
-});
+// Load modules
+var http = require('http');
+var url = require('url');
+var fs = require('fs');
 
-// Get all comments
-app.get('/comments', (req, res) => {
-  res.send('Getting all comments');
-});
+// Create server
+http.createServer(function (req, res) {
+  // Get the URL
+  var url_parts = url.parse(req.url);
+  console.log(url_parts);
 
-// Get a specific comment
-app.get('/comments/:id', (req, res) => {
-  res.send('Getting a specific comment');
-});
+  if (url_parts.pathname == '/') {
+    // Read the file
+    fs.readFile('./comments.html', function(err, data) {
+      res.end(data);
+    });
+  } else if (url_parts.pathname == '/post') {
+    // Get the comment
+    var comment = url_parts.query.split('=')[1];
+    console.log(comment);
 
-// Update a specific comment
-app.put('/comments/:id', (req, res) => {
-  res.send('Updating a specific comment');
-});
+    // Append the comment to the file
+    fs.appendFile('comments.html', comment + '<br>', function(err) {
+      if (err) {
+        console.log(err);
+      }
+    });
 
-// Delete a specific comment
-app.delete('/comments/:id', (req, res) => {
-  res.send('Deleting a specific comment');
-});
+    // Read the file
+    fs.readFile('./comments.html', function(err, data) {
+      res.end(data);
+    });
+  }
+}).listen(8080);
 
-// Start the server
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
-});
+console.log('Server running at http://localhost:8080/');
